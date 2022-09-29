@@ -1,0 +1,89 @@
+name: windows
+
+on:
+  push:
+    paths-ignore:
+    - '.github/workflows/**'
+    - '!.github/workflows/windows.yml'
+    - '!.github/workflows/EnterDevShell.ps1'
+  pull_request:
+    paths-ignore:
+    - '.github/workflows/**'
+    - '!.github/workflows/windows.yml'
+    - '!.github/workflows/EnterDevShell.ps1'
+
+jobs:
+  windows-msvc:
+    runs-on: windows-2022
+    steps:
+    - name: checkout libva
+      uses: actions/checkout@v2
+      with:
+        repository: intel/libva
+        path: libva
+    - name: checkout libva-utils
+      uses: actions/checkout@v2
+      with:
+        path: libva-utils
+    - name: 'Setup Python'
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install Meson
+      run: pip install meson
+    - name: Enter DevShell
+      shell: pwsh
+      run: |
+        ls ${{ github.workspace }}
+        ls ../
+        ls ../../
+        ls ../../../
+        powershell -ExecutionPolicy Bypass '${{ github.workspace }}\.github\workflows\EnterDevShell.ps1 ${{ inputs.architecture }}'
+    - name: Build libva
+      run: |
+        cd libva
+        meson build
+        ninja -C build install
+    - name: Build libva-utils
+      run: |
+        cd libva-utils
+        meson build
+        ninja -C build install
+
+  windows-mingw:
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+    - name: checkout libva
+      uses: actions/checkout@v2
+      with:
+        repository: intel/libva
+        path: libva
+    - name: checkout libva-utils
+      uses: actions/checkout@v2
+      with:
+        path: libva-utils
+    - name: 'Setup MSYS2'
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: mingw64
+        update: false
+        pacboy: >-
+          toolchain:p
+          meson:p
+    - name: Enter DevShell
+      shell: pwsh
+      run: |
+        powershell -ExecutionPolicy Bypass '${{ github.workspace }}\.github\workflows\EnterDevShell.ps1 ${{ inputs.architecture }}'
+    - name: Build libva
+      run: |
+        cd libva
+        CC=gcc meson build
+        CC=gcc ninja -C build install
+    - name: Build libva-utils
+      run: |
+        cd libva-utils
+        CC=gcc meson build
+        CC=gcc ninja -C build install
