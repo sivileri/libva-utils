@@ -80,7 +80,7 @@ use_win32 = false
 if get_option('win32') != 'false'
   require_win32 = get_option('win32') == 'true'
   use_win32 = dependency('libva-win32', required: require_win32).found()
-  libva_utils_flags = [ '-DHAVE_VA_WIN32=1', '/std:c++20' ]
+  libva_utils_flags = [ '-DHAVE_VA_WIN32=1', '-DNOMINMAX']
 endif
 
 add_project_arguments(libva_utils_flags,
@@ -101,7 +101,8 @@ if not use_win32
   subdir('videoprocess')
   subdir('vendor/intel')
   subdir('vendor/intel/sfcsample')
-  if get_option('tests')
-    subdir('test')
-  endif
+endif
+
+if get_option('tests')
+  subdir('test')
 endif
