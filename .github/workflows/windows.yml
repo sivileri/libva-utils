@@ -54,10 +54,9 @@ jobs:
         ninja -C build install
     - name: Build libva-utils
       run: |
-        $env:Path += Resolve-Path pkg-config\
         $env:Path += ";"
-        $env:Path += "c:\bin\;"
-        $env:Path += "c:\lib\;"
+        $env:Path += Resolve-Path pkg-config\
+        $env:Path += ";c:\bin\;c:\lib\"
         $env:PKG_CONFIG_PATH = "C:\lib\pkgconfig"
         del C:\Strawberry\perl\bin\pkg-config*
         echo $env:PKG_CONFIG_PATH
