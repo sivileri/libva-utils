@@ -47,7 +47,6 @@ jobs:
         cp pkg-config_0.26-1_win32\bin\* pkg-config\
         cp gettext-runtime_0.18.1.1-2_win32\bin\* pkg-config\
         cp glib_2.28.8-1_win32\bin\* pkg-config\
-        ls pkg-config\
     - name: Build libva
       run: |
         cd libva
@@ -56,8 +55,8 @@ jobs:
     - name: Build libva-utils
       run: |
         cd libva-utils
-        ls ..\pkg-config\
-        meson build -Dtests=true --pkg-config-path="..\pkg-config\pkg-config.exe"
+        $env:Path += "D:\a\libva-utils\libva-utils\pkg-config"
+        meson build -Dtests=true
         ninja -C build install
 
   windows-mingw:
