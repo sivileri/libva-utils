@@ -41,7 +41,9 @@ jobs:
         ninja -C build install
     - name: Build libva-utils
       run: |
-        ls C:\bin
+        set PKG_CONFIG_PATH='C:\lib\pkgconfig'
+        copy c:\bin\va-2.dll c:\bin\va.dll
+        copy c:\bin\va_win32-2.dll c:\bin\va_win32.dll
         cd libva-utils
         meson build -Dtests=true
         ninja -C build install
