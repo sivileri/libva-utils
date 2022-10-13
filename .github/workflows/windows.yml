@@ -32,17 +32,18 @@ jobs:
     - name: Install Meson
       run: pip install meson
     - name: Enter DevShell
-      run: 'libva-utils\.github\workflows\EnterDevShell.ps1 ${{ inputs.architecture }}'
+      run: |
+        'libva-utils\.github\workflows\EnterDevShell.ps1 ${{ inputs.architecture }}'
+        $env:PKG_CONFIG_PATH='C:\lib\pkgconfig'
       shell: pwsh
     - name: Build libva
       run: |
         cd libva
         meson build
         ninja -C build install
-        copy c:\bin\va-2.dll c:\bin\va.dll
-        copy c:\bin\va_win32-2.dll c:\bin\va_win32.dll
     - name: Build libva-utils
       run: |
+        ls C:\bin
         cd libva-utils
         meson build
         ninja -C build install
