@@ -39,6 +39,8 @@ jobs:
         cd libva
         meson build
         ninja -C build install
+        copy d:\bin\va-2.dll copy d:\bin\va.dll
+        copy d:\bin\va_win32-2.dll copy d:\bin\va_win32.dll
     - name: Build libva-utils
       run: |
         cd libva-utils
