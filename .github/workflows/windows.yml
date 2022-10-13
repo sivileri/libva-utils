@@ -45,7 +45,7 @@ jobs:
       run: |
         ls C:\bin
         cd libva-utils
-        meson build
+        meson build -Dtests=true
         ninja -C build install
 
   windows-mingw:
@@ -82,5 +82,5 @@ jobs:
     - name: Build libva-utils
       run: |
         cd libva-utils
-        CC=gcc meson build
+        CC=gcc meson build -Dtests=true
         CC=gcc ninja -C build install
