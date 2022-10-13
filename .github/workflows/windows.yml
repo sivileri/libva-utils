@@ -34,6 +34,20 @@ jobs:
     - name: Enter DevShell
       run: 'libva-utils\.github\workflows\EnterDevShell.ps1 ${{ inputs.architecture }}'
       shell: pwsh
+    - name: Install pkg-config
+      shell: pwsh
+      run: |
+        Invoke-RestMethod -Uri https://download.gnome.org/binaries/win32/dependencies/pkg-config_0.26-1_win32.zip -OutFile pkg-config_0.26-1_win32.zip
+        Expand-Archive pkg-config_0.26-1_win32.zip
+        Invoke-RestMethod -Uri http://ftp.gnome.org/pub/gnome/binaries/win32/glib/2.28/glib_2.28.8-1_win32.zip -OutFile glib_2.28.8-1_win32.zip
+        Expand-Archive glib_2.28.8-1_win32.zip
+        Invoke-RestMethod -Uri http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/gettext-runtime_0.18.1.1-2_win32.zip -OutFile gettext-runtime_0.18.1.1-2_win32.zip
+        Expand-Archive gettext-runtime_0.18.1.1-2_win32.zip
+        mkdir pkg-config
+        cp pkg-config_0.26-1_win32\bin\* pkg-config\
+        cp gettext-runtime_0.18.1.1-2_win32\bin\* pkg-config\
+        cp glib_2.28.8-1_win32\bin\* pkg-config\
+        ls pkg-config\
     - name: Build libva
       run: |
         cd libva
@@ -41,11 +55,9 @@ jobs:
         ninja -C build install
     - name: Build libva-utils
       run: |
-        set PKG_CONFIG_PATH='C:\lib\pkgconfig'
-        copy c:\bin\va-2.dll c:\bin\va.dll
-        copy c:\bin\va_win32-2.dll c:\bin\va_win32.dll
         cd libva-utils
-        meson build -Dtests=true
+        ls ..\pkg-config\
+        meson build -Dtests=true --pkg-config-path="..\pkg-config\pkg-config.exe"
         ninja -C build install
 
   windows-mingw:
