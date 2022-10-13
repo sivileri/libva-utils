@@ -55,7 +55,7 @@ jobs:
     - name: Build libva-utils
       run: |
         cd libva-utils
-        $env:Path += "D:\a\libva-utils\libva-utils\pkg-config"
+        $env:Path += Resolve-Path ..\pkg-config\
         meson build -Dtests=true
         ninja -C build install
 
