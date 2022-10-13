@@ -59,8 +59,6 @@ jobs:
         $env:Path += ";c:\bin\;c:\lib\"
         $env:PKG_CONFIG_PATH = "C:\lib\pkgconfig"
         del C:\Strawberry\perl\bin\pkg-config*
-        echo $env:PKG_CONFIG_PATH
-        echo $env:PATH
         cd libva-utils
         meson build -Dtests=true
         ninja -C build install
