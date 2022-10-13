@@ -31,9 +31,6 @@ jobs:
         python-version: '3.x'
     - name: Install Meson
       run: pip install meson
-    - name: Enter DevShell
-      run: 'libva-utils\.github\workflows\EnterDevShell.ps1 ${{ inputs.architecture }}'
-      shell: pwsh
     - name: Install pkg-config
       shell: pwsh
       run: |
@@ -47,6 +44,13 @@ jobs:
         cp pkg-config_0.26-1_win32\bin\* pkg-config\
         cp gettext-runtime_0.18.1.1-2_win32\bin\* pkg-config\
         cp glib_2.28.8-1_win32\bin\* pkg-config\
+        $env:Path += Resolve-Path pkg-config\
+        $env:Path += "c:\bin\"
+        $env:Path += "c:\lib\"
+        $env:PKG_CONFIG_PATH = "C:\lib\pkgconfig"
+    - name: Enter DevShell
+      run: 'libva-utils\.github\workflows\EnterDevShell.ps1 ${{ inputs.architecture }}'
+      shell: pwsh
     - name: Build libva
       run: |
         cd libva
@@ -56,11 +60,8 @@ jobs:
       run: |
         cd libva-utils
         del C:\Strawberry\perl\bin\pkg-config*
-        echo Resolve-Path ..\pkg-config\
-        ls Resolve-Path ..\pkg-config\
-        $env:Path += Resolve-Path ..\pkg-config\
-        $env:Path += c:\bin\
-        echo $env:Path
+        echo $env:PKG_CONFIG_PATH
+        echo $env:PATH
         meson build -Dtests=true
         ninja -C build install
 
