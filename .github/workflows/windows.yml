@@ -33,7 +33,7 @@ jobs:
       run: pip install meson
     - name: Enter DevShell
       run: |
-        'libva-utils\.github\workflows\EnterDevShell.ps1 ${{ inputs.architecture }}'
+        powershell -ExecutionPolicy Bypass 'libva-utils\.github\workflows\EnterDevShell.ps1 ${{ inputs.architecture }}'
         $env:PKG_CONFIG_PATH='C:\lib\pkgconfig'
       shell: pwsh
     - name: Build libva
