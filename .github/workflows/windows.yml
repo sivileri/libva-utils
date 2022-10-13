@@ -53,10 +53,14 @@ jobs:
         meson build
         ninja -C build install
     - name: Build libva-utils
-      run: | # Workaround for found pkg-config 'C:\\Strawberry\\perl\\bin\\pkg-config.BAT' but it is Strawberry Perl and thus broken. Ignoring...
+      run: |
         cd libva-utils
         del C:\Strawberry\perl\bin\pkg-config*
+        echo Resolve-Path ..\pkg-config\
+        ls Resolve-Path ..\pkg-config\
         $env:Path += Resolve-Path ..\pkg-config\
+        $env:Path += c:\bin\
+        echo $env:Path
         meson build -Dtests=true
         ninja -C build install
 
