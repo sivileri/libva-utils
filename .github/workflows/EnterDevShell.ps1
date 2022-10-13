@@ -36,3 +36,4 @@ $env_after = @{}
 Get-ChildItem env: | %{ $env_after.Add($_.Name, $_.Value) }
 $env_diff = $env_after.GetEnumerator() | where { -not $env_before.ContainsKey($_.Name) -or $env_before[$_.Name] -ne $_.Value }
 $env_diff | %{ echo "$($_.Name)=$($_.Value)" >> $env:GITHUB_ENV }
+$env:PKG_CONFIG_PATH="C:\lib\pkgconfig"
