@@ -32,11 +32,8 @@ jobs:
     - name: Install Meson
       run: pip install meson
     - name: Enter DevShell
+      run: 'libva-utils\.github\workflows\EnterDevShell.ps1 ${{ inputs.architecture }}'
       shell: pwsh
-      run: |
-        cd libva-utils
-        ls
-        powershell -ExecutionPolicy Bypass '.github\workflows\EnterDevShell.ps1 ${{ inputs.architecture }}'
     - name: Build libva
       run: |
         cd libva
@@ -72,9 +69,8 @@ jobs:
           toolchain:p
           meson:p
     - name: Enter DevShell
+      run: 'libva-utils\.github\workflows\EnterDevShell.ps1 ${{ inputs.architecture }}'
       shell: pwsh
-      run: |
-        powershell -ExecutionPolicy Bypass '${{ github.workspace }}\.github\workflows\EnterDevShell.ps1 ${{ inputs.architecture }}'
     - name: Build libva
       run: |
         cd libva
