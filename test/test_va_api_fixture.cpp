@@ -35,6 +35,7 @@
 #include <va/va_win32.h>
 #include <compat_win32.h>
 #include <wrl/client.h>
+#include <initguid.h>
 #include <directx/dxcore_interface.h>
 #else
 #include <unistd.h> // for close()

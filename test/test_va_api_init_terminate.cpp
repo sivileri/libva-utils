@@ -124,4 +124,186 @@ TEST_F(VAAPIInitTerminate, InitTermWithoutDisplay)
     EXPECT_STATUS_EQ(VA_STATUS_ERROR_INVALID_DISPLAY, vaTerminate(display));
 }
 
+#ifdef _WIN32
+
+TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_Win32_SpecificDevice)
+{
+    int major, minor;
+
+    VADisplay display = getWin32Display(0);
+    ASSERT_TRUE(display);
+
+    ASSERT_STATUS(vaInitialize(display, &major, &minor));
+
+    EXPECT_EQ(VA_MAJOR_VERSION, major)
+            << "Check installed driver version";
+    EXPECT_LE(VA_MINOR_VERSION, minor)
+            << "Check installed driver version";
+
+    ASSERT_STATUS(vaTerminate(display));
+}
+
+TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_Win32_SpecificDevice_ValidNameOverride)
+{
+    int major, minor;
+
+    /* This is the default driver provided by win32 backend */
+    ASSERT_EQ(0, setenv("LIBVA_DRIVER_NAME", "vaon12_drv_video", 1));
+
+    VADisplay display = getWin32Display(0);
+    ASSERT_TRUE(display);
+
+    ASSERT_STATUS(vaInitialize(display, &major, &minor));
+
+    EXPECT_EQ(VA_MAJOR_VERSION, major)
+            << "Check installed driver version";
+    EXPECT_LE(VA_MINOR_VERSION, minor)
+            << "Check installed driver version";
+
+    ASSERT_STATUS(vaTerminate(display));
+    
+    EXPECT_EQ(0, unsetenv("LIBVA_DRIVER_NAME"));
+}
+
+TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_Win32_SpecificDevice_ValidvaSetDriverNameOverride)
+{
+    int major, minor;
+
+    VADisplay display = getWin32Display(0);
+    ASSERT_TRUE(display);
+
+    /* This is the default driver provided by win32 backend */
+    char driver[17] = "vaon12_drv_video";
+    EXPECT_STATUS(vaSetDriverName(display, driver));
+
+    ASSERT_STATUS(vaInitialize(display, &major, &minor));
+
+    EXPECT_EQ(VA_MAJOR_VERSION, major)
+            << "Check installed driver version";
+    EXPECT_LE(VA_MINOR_VERSION, minor)
+            << "Check installed driver version";
+
+    ASSERT_STATUS(vaTerminate(display));
+}
+
+TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_Win32_SpecificDevice_ValidNameOverrideAsAPath)
+{
+    int major, minor;
+
+    /* This is the default driver provided by win32 backend */
+    ASSERT_EQ(0, setenv("LIBVA_DRIVER_NAME", ".\\vaon12_drv_video", 1));
+
+    VADisplay display = getWin32Display(0);
+    ASSERT_TRUE(display);
+
+    ASSERT_STATUS(vaInitialize(display, &major, &minor));
+
+    EXPECT_EQ(VA_MAJOR_VERSION, major)
+            << "Check installed driver version";
+    EXPECT_LE(VA_MINOR_VERSION, minor)
+            << "Check installed driver version";
+
+    ASSERT_STATUS(vaTerminate(display));
+    
+    EXPECT_EQ(0, unsetenv("LIBVA_DRIVER_NAME"));
+}
+
+TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_Win32_SpecificDevice_InvalidNameOverride)
+{
+    int major, minor;
+
+    ASSERT_EQ(0, setenv("LIBVA_DRIVER_NAME", "not_existing_driver", 1));
+
+    VADisplay display = getWin32Display(0);
+    ASSERT_TRUE(display);
+
+    EXPECT_STATUS_EQ(
+        VA_STATUS_ERROR_UNKNOWN, vaInitialize(display, &major, &minor));
+
+    EXPECT_EQ(VA_MAJOR_VERSION, major)
+            << "Check installed driver version";
+    EXPECT_LE(VA_MINOR_VERSION, minor)
+            << "Check installed driver version";
+
+    ASSERT_STATUS(vaTerminate(display));
+    
+    EXPECT_EQ(0, unsetenv("LIBVA_DRIVER_NAME"));
+}
+
+TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_Win32_SpecificDevice_ValidNameAndPathOverride)
+{
+    int major, minor;
+
+    /* This is the default driver provided by win32 backend */
+    ASSERT_EQ(0, setenv("LIBVA_DRIVER_NAME", "vaon12_drv_video", 1));
+    ASSERT_EQ(0, setenv("LIBVA_DRIVERS_PATH", ".\\", 1));
+
+    VADisplay display = getWin32Display(0);
+    ASSERT_TRUE(display);
+
+    ASSERT_STATUS(vaInitialize(display, &major, &minor));
+
+    EXPECT_EQ(VA_MAJOR_VERSION, major)
+            << "Check installed driver version";
+    EXPECT_LE(VA_MINOR_VERSION, minor)
+            << "Check installed driver version";
+
+    ASSERT_STATUS(vaTerminate(display));
+    
+    EXPECT_EQ(0, unsetenv("LIBVA_DRIVER_NAME"));
+    EXPECT_EQ(0, unsetenv("LIBVA_DRIVERS_PATH"));
+}
+
+TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_Win32_SpecificDevice_InvalidNameAndPathOverride)
+{
+    int major, minor;
+
+    /* This is the default driver provided by win32 backend */
+    ASSERT_EQ(0, setenv("LIBVA_DRIVER_NAME", "vaon12", 1));
+    ASSERT_EQ(0, setenv("LIBVA_DRIVERS_PATH", "badpath", 1));
+
+    VADisplay display = getWin32Display(0);
+    ASSERT_TRUE(display);
+
+    EXPECT_STATUS_EQ(
+        VA_STATUS_ERROR_UNKNOWN, vaInitialize(display, &major, &minor));
+
+    EXPECT_EQ(VA_MAJOR_VERSION, major)
+            << "Check installed driver version";
+    EXPECT_LE(VA_MINOR_VERSION, minor)
+            << "Check installed driver version";
+
+    ASSERT_STATUS(vaTerminate(display));
+    
+    EXPECT_EQ(0, unsetenv("LIBVA_DRIVER_NAME"));
+    EXPECT_EQ(0, unsetenv("LIBVA_DRIVERS_PATH"));
+}
+
+
+TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_Win32_SpecificDevice_DriverRetryWithNoSuffix)
+{
+    int major, minor;
+
+    /* This is the default driver provided by win32 backend */
+    ASSERT_EQ(0, setenv("LIBVA_DRIVER_NAME", "vaon12_drv_video", 1));
+    ASSERT_EQ(0, setenv("LIBVA_DRIVERS_PATH", ".\\", 1));
+
+    VADisplay display = getWin32Display(0);
+    ASSERT_TRUE(display);
+
+    ASSERT_STATUS(vaInitialize(display, &major, &minor));
+
+    EXPECT_EQ(VA_MAJOR_VERSION, major)
+            << "Check installed driver version";
+    EXPECT_LE(VA_MINOR_VERSION, minor)
+            << "Check installed driver version";
+
+    ASSERT_STATUS(vaTerminate(display));
+    
+    EXPECT_EQ(0, unsetenv("LIBVA_DRIVER_NAME"));
+    EXPECT_EQ(0, unsetenv("LIBVA_DRIVERS_PATH"));
+}
+
+#endif // #ifdef _WIN32
+
 } // namespace VAAPI
