@@ -41,6 +41,9 @@ public:
 
     virtual ~VAAPIFixture();
 
+#if defined(_WIN32)
+    static VADisplay getWin32Display(int adapter_index);
+#endif
     VADisplay getDisplay();
     VADisplay doInitialize();
     void doTerminate();

@@ -34,6 +34,8 @@
 #if defined(_WIN32)
 #include <va/va_win32.h>
 #include <compat_win32.h>
+#include <wrl/client.h>
+#include <directx/dxcore_interface.h>
 #else
 #include <unistd.h> // for close()
 #include <va/va_drm.h>
@@ -86,9 +88,35 @@ VAAPIFixture::~VAAPIFixture()
 }
 
 #if defined(_WIN32)
-static VADisplay getWin32Display(LUID* adapter)
+VADisplay VAAPIFixture::getWin32Display(int adapter_index)
 {
-    return vaGetDisplayWin32(adapter);
+    LUID adapter_luid;
+    if (adapter_index >= 0) {
+        HMODULE dxcore_mod = LoadLibrary("DXCore.DLL");
+        if (!dxcore_mod)
+            return NULL;
+
+        typedef HRESULT(WINAPI *PFN_CREATE_DXCORE_ADAPTER_FACTORY)(REFIID riid, void **ppFactory);
+        PFN_CREATE_DXCORE_ADAPTER_FACTORY DXCoreCreateAdapterFactory = (PFN_CREATE_DXCORE_ADAPTER_FACTORY)GetProcAddress(dxcore_mod, "DXCoreCreateAdapterFactory");
+        if (!DXCoreCreateAdapterFactory)
+            return NULL;
+
+        Microsoft::WRL::ComPtr<IDXCoreAdapterFactory> factory;
+        if (FAILED(DXCoreCreateAdapterFactory(IID_IDXCoreAdapterFactory, (void **)factory.GetAddressOf())))
+            return NULL;
+
+        Microsoft::WRL::ComPtr<IDXCoreAdapterList> list = nullptr;
+        if (FAILED(factory->CreateAdapterList(1, &DXCORE_ADAPTER_ATTRIBUTE_D3D12_GRAPHICS, list.GetAddressOf())))
+            return NULL;
+
+        Microsoft::WRL::ComPtr<IDXCoreAdapter> adapter;
+        if (FAILED(list->GetAdapter(adapter_index, adapter.GetAddressOf())))
+            return NULL;
+
+        if (FAILED(adapter->GetProperty(DXCoreAdapterProperty::InstanceLuid, &adapter_luid)))
+            return NULL;
+    }
+    return vaGetDisplayWin32(&adapter_luid);
 }
 #else
 static VADisplay getDrmDisplay(int &fd)
@@ -140,7 +168,7 @@ static VADisplay getDrmDisplay(int &fd)
 VADisplay VAAPIFixture::getDisplay()
 {
 #if defined(_WIN32)
-    m_vaDisplay = getWin32Display(NULL);
+    m_vaDisplay = getWin32Display(-1 /* Auto select adapter */);
 #else
     m_vaDisplay = getDrmDisplay(m_drmHandle);
 #endif
@@ -542,7 +570,7 @@ void VAAPIFixtureSharedDisplay::SetUpTestSuite()
 {
     if (s_drmHandle < 0) {
 #if defined(_WIN32)
-        s_vaDisplay = getWin32Display(NULL);
+        s_vaDisplay = getWin32Display(-1 /* Auto select adapter */);
 #else
         s_vaDisplay = getDrmDisplay(s_drmHandle);
 #endif
